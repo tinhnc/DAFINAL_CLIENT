@@ -155,7 +155,8 @@ module.exports = {
       const result = SendmailController.sendMail(
         req.body.email,
         "ĐĂNG KÝ TÀI KHOẢN THÀNH CÔNG! XÁC NHẬN EMAIL ĐĂNG KÝ",
-        "Chúc mừng bạn đã đăng ký thành công trên T_Sport! Bạn vui lòng xác nhận email đăng ký bằng cách nhấn vào đường link sau:" +
+        "Cảm ơn bạn đã đăng ký tài khoản tại Outbreakstyle!" +
+        "Bạn vui lòng xác nhận email để hoàn tất đăng ký nhé:" +
           "<br>" +
           "<p>" +
           `${req.protocol}://${req.get("host")}/email-activate/${token}` +
