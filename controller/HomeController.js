@@ -4,6 +4,7 @@ const Category = require("../models/Category");
 const Blog = require("../models/Blog");
 const { format } = require("date-fns");
 const Order = require("../models/ProductOrder");
+const { convert } = require('html-to-text');
 
 module.exports = {
   index: async (req, res, next) => {
@@ -17,10 +18,14 @@ module.exports = {
       .sort({ date: -1 }) // Sắp xếp theo ngày giảm dần
       .limit(3); // Giới hạn chỉ lấy 3 bài viết gần nhất
     const formattedBlogs = blogs.map((blog) => {
+      const plainTextContent = convert(blog.content, {
+        wordwrap: false, // Disable word wrapping
+      });
       const truncatedContent =
         blog.content.length > 200
           ? blog.content.slice(0, 200) + "..."
-          : blog.content;
+          : plainTextContent;
+
       const formattedDate = format(blog.date, "dd-MM-yyyy");
       return {
         ...blog.toObject(),

@@ -1,5 +1,6 @@
 const Blog = require("../models/Blog");
 const utils = require("../utils/mongoose");
+const { convert } = require('html-to-text');
 
 // Hàm định dạng ngày giờ
 function formatDateTime(dateString) {
@@ -23,10 +24,13 @@ module.exports = {
   
       // Tạo một trường mới để lưu giá trị định dạng ngày giờ
       const formattedBlogs = blogs.map((blog) => {
+        const plainTextContent = convert(blog.content, {
+          wordwrap: false, // Disable word wrapping
+        });
         // Truncate the content to a specific character limit (e.g., 200 characters)
         const truncatedContent = blog.content.length > 200
           ? blog.content.slice(0, 200) + '...'  // If content is longer than 200 characters, truncate it
-          : blog.content; // Otherwise, use the full content
+          : plainTextContent;
   
         return {
           ...blog.toObject(),
