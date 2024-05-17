@@ -339,7 +339,7 @@ module.exports = {
     const result = SendmailController.sendMail(
       req.body.email,
       "Lấy lại mật khẩu",
-      `Click vào link sau để đặt lại mật khẩu: ${req.protocol}://${req.get(
+      `Nhấn vào link để đặt lại mật khẩu của bạn: ${req.protocol}://${req.get(
         "host"
       )}/reset-password/${user._id}`
     );
