@@ -12,18 +12,20 @@ module.exports = {
     const latestProducts = await Product.find()
       .lean()
       .sort({ date: -1 }) // Sắp xếp theo ngày giảm dần
-      .limit(8); // Giới hạn chỉ lấy 7 sản phẩm gần nhất
+      .limit(8); // Giới hạn chỉ lấy 8 sản phẩm gần nhất
     
     const blogs = await Blog.find()
       .sort({ date: -1 }) // Sắp xếp theo ngày giảm dần
       .limit(3); // Giới hạn chỉ lấy 3 bài viết gần nhất
+
     const formattedBlogs = blogs.map((blog) => {
       const plainTextContent = convert(blog.content, {
         wordwrap: false, // Disable word wrapping
       });
-      const truncatedContent =
-        blog.content.length > 200
-          ? blog.content.slice(0, 200) + "..."
+
+      const truncatedContent = 
+        plainTextContent.length > 200
+          ? plainTextContent.slice(0, 200) + "..."
           : plainTextContent;
 
       const formattedDate = format(blog.date, "dd-MM-yyyy");
@@ -33,6 +35,7 @@ module.exports = {
         truncatedContent: truncatedContent,
       };
     });
+
     // let categoryData = categories;
     // for (let i = 0; i < categoryData.length; i++) {
     //   categoryData[i].listProduct = [];
@@ -46,7 +49,6 @@ module.exports = {
     //     }
     //   }
     // }
-
 
     res.render("home/home", {
       // category: categories,

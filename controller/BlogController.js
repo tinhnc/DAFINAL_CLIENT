@@ -69,6 +69,7 @@ module.exports = {
   
       // Định dạng ngày giờ và nội dung cho các bài viết gần nhất
       const formattedRecentBlogs = recentBlogs.map((recentBlog) => {
+        
         // Truncate the content to a specific character limit (e.g., 200 characters)
         const truncatedContent = recentBlog.content.length > 200
           ? recentBlog.content.slice(0, 200) + '...'  // If content is longer than 200 characters, truncate it
