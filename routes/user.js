@@ -44,6 +44,17 @@ router.get("/myaccount/changePassword", UserController.getChangePassword);
 
 router.post("/myaccount/changePassword", UserController.postChangePassword);
 
+// router.post("/loginGoogle", UserController);
+// router.post("/loginFacebook", UserController);
+
+// Google authentication routes
+router.get('/loginGoogle', loginMxhController.loginGoogle);
+router.get('/google/callback', loginMxhController.googleCallback);
+
+// Facebook authentication routes
+router.get('/loginFacebook', loginMxhController.loginFacebook);
+router.get('/facebook/callback', loginMxhController.facebookCallback);
+
 
 router.get(
   "/myaccount/cancel-order/:idCheckOut",

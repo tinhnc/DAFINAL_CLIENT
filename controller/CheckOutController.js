@@ -22,12 +22,24 @@ module.exports = {
     var discount = 0;
     for await (let idProductOrder of shoppingCart.listProductOrder) {
       let productOrder = await ProductOrder.findById(idProductOrder).lean();
-
       productOrder.sumPriceProduct =
         productOrder.quantity * productOrder.unitPrice;
       sumPrice += productOrder.sumPriceProduct;
       listProductOrder.push(productOrder);
+      console.log("lưuuwuwuwu", price)
+      console.log("discount", discount)
+      if(shoppingCart.discount){
+        discount = shoppingCart.discount;
+        price = sumPrice - discount
+      }
+      else{
+        price = sumPrice
+      }
     }
+    
+
+    console.log("giassss", price)
+    console.log("discount", discount)
 
     const errorNumberPhone = req.query.error;
     const errorListProduct = req.query.errorListProduct;

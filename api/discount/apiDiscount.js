@@ -18,25 +18,20 @@ module.exports = {
       }
 
     const currentDate = new Date();
-      if (currentDate < discount.dayStart || currentDate > discount.dayEnd || quantity > 0) {
+      if (currentDate < discount.dayStart || currentDate > discount.dayEnd) {
         return res.status(400).json({ message: "Mã giảm giá không còn hiệu lực" });
       }
 
-
       if(discount){
-      const user = await User.findOne({ _id : res.locals.user.id });
+        const user = await User.findOne({ _id : res.locals.user.id });
        const check = await ShoppingCart.findByIdAndUpdate(
           { _id: user.idShoppingCart },
           {
             discount: discount.discount,
           }
         );
-        await Discount.findOneAndUpdate(
-          { codeDiscount: discountCode },
-          {
-            quantity: quantity - 1
-          }
-          );
+        console.log(check)
+        console.log(discount.discount)
       }
 
     return res.status(200).json({ discount });

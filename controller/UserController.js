@@ -14,6 +14,7 @@ module.exports = {
   getLogin: (req, res, next) => {
     if (req.user) {
       res.redirect("/home");
+      alert("Login thành công!")
       return;
     }
     res.render("login/login", {
@@ -115,35 +116,80 @@ module.exports = {
   },
 
   postRegister: async (req, res, next) => {
+    const { email, password, re_password, name, address, phonenumber } = req.body;
+  
+    // Kiểm tra độ dài của email, password, name, và address
+    if (email.length < 8) {
+      return res.render("register/register", {
+        layout: false,
+        error: "Email không phù hợp",
+        formData: {email, name, address, phonenumber }, // Thêm dòng này
+      });
+    }
+  
+    if (password.length < 6) {
+      return res.render("register/register", {
+        layout: false,
+        error: "Mật khẩu phải chứa ít nhất 6 ký tự",
+      });
+    }
+  
+    if (name.length < 2) {
+      return res.render("register/register", {
+        layout: false,
+        error: "Tên không phù hợp",
+        formData: { name, email, address, phonenumber },
+      });
+    }
+  
+    if (address.length < 20) {
+      return res.render("register/register", {
+        layout: false,
+        error: "Địa chỉ không phù hợp",
+        formData: { email, name,address, phonenumber }, // Thêm dòng này
+
+      });
+      }
+       if (phonenumber.length < 10 || phonenumber.length > 11) {
+      return res.render("register/register", {
+        layout: false,
+        error: "số điện thoại không hợp lệ",
+        formData: { email, name, address, phonenumber }, // Thêm dòng này
+
+      });
+    }
+  
     if (req.body.password !== req.body.re_password) {
       return res.render("register/register", {
         layout: false,
         error: "Mật khẩu không khớp",
       });
     }
-
-    const user = await User.findOne({ email: req.body.email }).lean();
-    if (user) {
-      return res.render("register/register", {
-        layout: false,
-        error: "Email đã tồn tại",
-      });
-    }
-
-    const { name, email, password } = req.body;
-
-    const hash = bcrypt.hashSync(req.body.password, 10);
-    const newUser = new User({
-      email: email,
-      password: hash,
-      name: req.body.name,
-      address: req.body.address,
-      phonenumber: req.body.phonenumber,
-      status: false,
-    });
-
+  
     try {
+      const user = await User.findOne({ email: req.body.email });
+  
+      if (user) {
+        return res.render("register/register", {
+          layout: false,
+          error: "Email đã tồn tại",
+        });
+      }
+  
+      const { name, email, password } = req.body;
+  
+      const hash = await bcrypt.hash(req.body.password, 10);
+      const newUser = new User({
+        email: email,
+        password: hash,
+        name: req.body.name,
+        address: req.body.address,
+          phonenumber: req.body.phonenumber,
+        status: false,
+      });
+  
       await newUser.save();
+  
       // Xử lý sau khi lưu thành công
       const id = newUser._id;
       const status = newUser.status;
@@ -152,29 +198,28 @@ module.exports = {
         process.env.JWT_ACC_ACTIVATE,
         { expiresIn: "15m" }
       );
-      const result = SendmailController.sendMail(
+  
+      const result = await SendmailController.sendMail(
         req.body.email,
-        "ĐĂNG KÝ TÀI KHOẢN THÀNH CÔNG! XÁC NHẬN EMAIL ĐĂNG KÝ",
-        "Cảm ơn bạn đã đăng ký tài khoản tại Outbreakstyle!" +
-        "Bạn vui lòng xác nhận email để hoàn tất đăng ký nhé:" +
-          "<br>" +
-          "<p>" +
-          `${req.protocol}://${req.get("host")}/email-activate/${token}` +
-          "<p>" +
-          "<br>" +
-          `Email: ${req.body.email}` +
-          "<br>" +
-          `Mật khẩu: ${req.body.password}`
+        "ĐĂNG KÝ TÀI KHOẢN THÀNH CÔNG! VUI LÒNG XÁC NHẬN EMAIL ĐĂNG KÝ",
+        `Chúc mừng bạn đã đăng ký thành công trên T_Sport! Bạn vui lòng xác nhận email đăng ký bằng cách nhấn vào đường link sau:
+        ${req.protocol}://${req.get("host")}/email-activate/${token}
+        
+        Email: ${req.body.email}
+        Mật khẩu: ${req.body.password}`
+  
       );
+  
       res.render("login/login", {
         layout: false,
         message:
-          "Đăng ký tài khoản thành công, check mail để xem thông tin tài khoản và xác nhận tài khoản",
+          "Đăng ký tài khoản thành công, vui lòng kiểm tra mail để xem thông tin tài khoản và xác nhận tài khoản",
       });
     } catch (error) {
       return next(error);
     }
   },
+  
 
   getMyAccount: async (req, res, next) => {
     if (req.user == null) {
@@ -198,14 +243,28 @@ module.exports = {
           const productOrder = await ProductOrder.findById(
             shoppingCartUser.listProductOrder[j]
           ).lean();
+          if( productOrder.name.length > 40){
+            productOrder.name += '...'
+          }
+          productOrder.name = productOrder.name.slice(0, 40);
           sum += productOrder.unitPrice * productOrder.quantity;
           checkOutUserAll[i].listProductOrder.push(productOrder);
+          
+        }
+        checkOutUserAll[i].subTotal = sum;
+        checkOutUserAll[i].discount = 0;
+        if(shoppingCartUser.discount !== 0){
+          checkOutUserAll[i].discount = shoppingCartUser.discount
+          checkOutUserAll[i].total = sum - shoppingCartUser.discount
+          console.log("ttttt",checkOutUserAll[i].total)
+          console.log("hhhh",checkOutUserAll[i].discount)
+        } else {
+          checkOutUserAll[i].total = sum;
         }
       } else {
         console.log("shoppingCartUser.listProductOrder is empty or null");
         // Thực hiện xử lý hoặc thông báo lỗi ở đây nếu cần thiết
       }
-      checkOutUserAll[i].total = sum;
       
     }
     let checkOutPending = [];
@@ -326,7 +385,6 @@ module.exports = {
   getForgotPassword: (req, res, next) => {
     res.render("forgot-password/forgot-password", { layout: false });
   },
-  //send mail đổi mk
   postForgotPassword: async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email }).lean();
     if (!user) {
@@ -339,7 +397,7 @@ module.exports = {
     const result = SendmailController.sendMail(
       req.body.email,
       "Lấy lại mật khẩu",
-      `Nhấn vào link để đặt lại mật khẩu của bạn: ${req.protocol}://${req.get(
+      `Click vào link sau để đặt lại mật khẩu: ${req.protocol}://${req.get(
         "host"
       )}/reset-password/${user._id}`
     );

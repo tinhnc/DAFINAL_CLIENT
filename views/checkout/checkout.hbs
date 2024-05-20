@@ -66,85 +66,69 @@
                             <input type="text" name="note" placeholder="Thông tin cần lưu ý">
                         </div>
                     </div>
-            </form>
                     <div class="col-lg-4 col-md-6">
                         <div class="checkout__order" style="padding: 25px; border-radius: 15px;">
                             <h4>Đơn đặt hàng</h4>
-                            <dialog id="dialog" style="border: 1px solid #a6a6a6;">
-                                <div class="row checkout__order__products">
-                                    <span class="col">Sản phẩm</span>
-                                    <span class="col">Đơn giá</span>
-                                     <span class="col">Số lượng</span>
-                                      <span class="col">Thành tiền</span> 
-                                      </div>
-                                <div id="modal-checkout" class="modal-checkout">
-                                    <div class="chekout-content">
-                                        <ul>
-                                            {{#each listProductOrder}}
-                                            <li class="row">
-                                                <span class="col overflow-hidden">{{this.name}}</span>
-                                                <span class="col">{{this.unitPrice}}</span>
-                                                <span class="col">{{this.quantity}}</span>
-                                                <span class="col">{{format this.sumPriceProduct}}</span>
-
-                                                </li>
-                                            {{/each}}
-                                                <li class="row">
-                                                    <span class="col-sm-9 text-primary-emphasis ">Tổng tiền</span>
-                                                    <span class="col-sm-3 text-danger">{{format sumPrice}}</span>
-                                                </li>
-                                        </ul>
-                                    </div>
-
+                            <div class="checkout__order__products">Sản phẩm <span>Giá</span></div>
+                            <ul style="height: 135px;">
+                                {{#each listProductOrder}}
+                                <div class="row">
+                                    <p class="col text-left overflow-hidden d-inline-block" style="max-height: 20px">
+                                        {{this.name}}</p> <span class="col text-right"
+                                        style="font-weight: 700;">{{format this.sumPriceProduct}}</span>
                                 </div>
-                                <span type="button" onclick="window.dialog.close();" aria-label="close" class="x">❌</span>
-                            </dialog>
-                            <span type="button" class="button-checkout-modal" onclick="window.dialog.showModal();">Xem chi tiết...</span>
+                                {{/each}}
+                                <li class="row" id="discount">
+                                    <span class="col-sm-8 text-primary-emphasis">Giảm giá</span>
+                                    <span class="col-sm-4 text-danger discount-money">- {{format discount}}</span>
+                                </li>
+                            </ul>
+
+                            <div class="checkout__order__total ">Tổng thanh toán <span class="text-primary">{{format price}}</span></div>
                             <div>
                                 <div>
                                     <button class="site-btn" onclick="postCheckout()">Thanh
                                         Toán Khi Nhận Hàng</button>
 
                                 </div>
-                                <div class="paymentt_online" style="margin-top: 10px;">
-                                    <ul>
-                                        <li class="Payment">
-                                            <div class="payment_online">
-                                                <div class="name">
-                                                    <h2
-                                                        style="font-size: 14px; color:#ffffff; text-align:center; cursor:pointer">
-                                                        THANH TOÁN ONLINE
-                                                    </h2>
-                                                </div>
-                                            </div>
-                                            <div class="payment_dropdown">
-                                                <form id="paymentForm" action="/pay" method="POST"
-                                                    style="margin-bottom: 15px;">
-                                                    <input type="hidden" id="sumPriceInput" name="sumPrice"
-                                                        value="{{sumPrice}}">
-                                                    <button type="submit" onclick="postCheckout()">Thanh Toán Bằng
-                                                        Paypal</button>
-                                                </form>
-                                                <form id="paymentForm" action="/create_payment_url" method="POST"
-                                                    enctype="application/x-www-form-urlencoded"
-                                                    style="padding-bottom: 10px;">
-                                                    <input type="hidden" id="sumPriceInput" name="sumPrice"
-                                                        value="{{sumPrice}}">
-                                                    <button type="submit" onclick="postCheckout()">Thanh Toán Bằng VnPay</button>
-                                                </form>
-                                            </div>
-                                        </li>
-                                    </ul>
 
+            </form>
+            <div class="paymentt_online" style="margin-top: 10px;">
+                <ul>
+                    <li class="Payment">
+                        <div class="payment_online">
+                            <div class="name">
+                                <h2 style="font-size: 14px; color:#ffffff; text-align:center; cursor:pointer">
+                                    THANH TOÁN ONLINE
+                                </h2>
+                            </div>
                         </div>
-
-                    </div>
-
+                        <div class="payment_dropdown">
+                            <form id="paymentForm" action="/pay" method="POST" style="margin-bottom: 15px;">
+                                <input type="hidden" id="discountInput" name="discount" value="{{discount}}">
+                                <input type="hidden" id="sumPriceInput" name="sumPrice" value="{{sumPrice}}">
+                                <button type="submit" onclick="postCheckout()">Thanh Toán Bằng
+                                    Paypal</button>
+                            </form>
+                            <form id="paymentForm" action="/create_payment_url" method="POST"
+                                enctype="application/x-www-form-urlencoded" style="padding-bottom: 10px;">
+                                <input type="hidden" id="discountInput" name="discount" value="{{discount}}">
+                                <input type="hidden" id="sumPriceInput" name="sumPrice" value="{{sumPrice}}">
+                                <button type="submit" onclick="postCheckout()">Thanh Toán Bằng
+                                    VnPay</button>
+                            </form>
                         </div>
-                    </div> 
-                </div>
+                    </li>
+                </ul>
+            </div>
 
         </div>
+
+    </div>
+    </div>
+    </div>
+
+    </div>
     </div>
 </section>
 
@@ -184,25 +168,20 @@
 <script src="/js/socket.io.js"></script>
 
 {{#section 'script'}}
-    <script>
-        const admin_url = $('#admin-url').val() || 'http://localhost:3000';
-        const socket = io(admin_url); // port này là port của đích đến của socket.io
-        console.log(admin_url);
+<script>
+    const admin_url = $('#admin-url').val() || 'http://localhost:3000';
+    const socket = io(admin_url); // port này là port của đích đến của socket.io
+    console.log(admin_url);
+    function sendMessage() {
+        let msg = $('#name-customer').val();
+        console.log(msg);
+        socket.emit("send-notification", msg);
+    }
 
     function postCheckout() {
         //let data = $('#formCheckout').serializeArray();
         //console.log(data);
 
-        const phone = $('#phone').val();
-        if (phone) {
-            sendMessage();
-            //$("#formCheckout").submit();
-            //console.log(phone);
-        }
-
-    function postCheckout() {
-        //let data = $('#formCheckout').serializeArray();
-        //console.log(data);
         const phone = $('#phone').val();
         if (phone) {
             sendMessage();
@@ -225,20 +204,19 @@
 </script>
 {{/if}}
 
-    {{#if errorNumberPhone}}
-        <script>
-            async function errorNumberPhone() {
-                $("#notify").html(`Bạn nhập sai số điện thoại!!`)
-                $('#notification').modal('show');
-                return true;
-            }
+{{#if errorNumberPhone}}
+<script>
+    async function errorNumberPhone() {
+        $("#notify").html(`Bạn nhập sai số điện thoại!!`)
+        $('#notification').modal('show');
+        return true;
+    }
+    function fixHtml() {
+        $("#notify").html(`Bạn chờ chút nhé!`)
+    }
+    errorNumberPhone();
+</script>
 
-            function fixHtml() {
-                $("#notify").html(`Bạn chờ chút nhé!`)
-            }
-            errorNumberPhone();
-        </script>
-
-    {{/if}}
+{{/if}}
 
 {{/section}}
